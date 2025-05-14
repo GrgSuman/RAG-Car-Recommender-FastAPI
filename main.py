@@ -34,49 +34,32 @@ def read_root():
 @app.post("/get-recommendations")
 async def get_recommendations(request: RecommendationRequest):
 
-    # if request.preferences:
-    #     print("\nPreference Details:")
-    #     print(f"Budget Range: ${request.preferences.budgetMin/100:.2f} - ${request.preferences.budgetMax/100:.2f}")
-    #     print(f"Car Types: {request.preferences.carTypes}")
-    #     print(f"Fuel Types: {request.preferences.fuelTypes}")
-    #     print(f"Brands: {request.preferences.brand}")
-    #     print(f"Features: {request.preferences.features}")
-    #     print(f"Primary Use: {request.preferences.primarilyUse}")
-    #     print(f"Top Priorities: {request.preferences.topPriorities}")
-    
-    # if request.activities:
-    #     print("\nActivity Details:")
-    #     for activity in request.activities:
-    #         print(f"Action: {activity.action}")
-    #         print(f"Car IDs: {activity.carIds}")
-    #         print(f"Query: {activity.query}")
-    
-    query = generate_query(request.preferences, request.activities)
+    query = generate_query(request.preferences, request.activities, request.savedVehicles)
 
-    # Initialize embeddings 
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001",
-        google_api_key=os.getenv("GOOGLE_API_KEY")
-    )
+    # # Initialize embeddings 
+    # embeddings = GoogleGenerativeAIEmbeddings(
+    #     model="models/embedding-001",
+    #     google_api_key=os.getenv("GOOGLE_API_KEY")
+    # )
 
-    # Load your index
-    vector_store = FAISS.load_local("car_search_index", embeddings,allow_dangerous_deserialization=True)
+    # # Load your index
+    # vector_store = FAISS.load_local("car_search_index", embeddings,allow_dangerous_deserialization=True)
 
-    # execute query
-    results = vector_store.similarity_search(query, k=1)
+    # # execute query
+    # results = vector_store.similarity_search(query, k=1)
 
-    # Extract only metadata from results
-    car_recommendations = []
-    for doc in results:
-        car = doc.metadata
-        # Format the price for better readability
-        car['price'] = f"${car['price']/100:,.2f}"
-        car_recommendations.append(car)
+    # # Extract only metadata from results
+    # car_recommendations = []
+    # for doc in results:
+    #     car = doc.metadata
+    #     # Format the price for better readability
+    #     car['price'] = f"${car['price']/100:,.2f}"
+    #     car_recommendations.append(car)
 
     return {
         "message": "Recommendations found",
         "query": query,
-        "recommendations": car_recommendations
+        "recommendations": "car_recommendations"
     }
 
 @app.post("/convert-to-vector")

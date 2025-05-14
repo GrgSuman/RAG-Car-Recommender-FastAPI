@@ -2,40 +2,53 @@
 from typing import Optional, List
 from models import Preferences, Activity
 
-def generate_query(preferences: Optional[Preferences], activities: Optional[List[Activity]]) -> str:
+def generate_query(preferences: Optional[Preferences], activities: Optional[List[Activity]], savedVehicles: Optional[List[str]]) -> str:
     """
-    Generates a search query from preferences and activities
+    Generates a natural language search query from preferences, activities, and saved vehicles
 
     Args:
         preferences: Preferences model containing user preferences
         activities: List of Activity models containing user activities
+        savedVehicles: List of saved vehicle titles
 
     Returns:
-        str: Generated search query
+        str: Generated natural language query
     """
     query_parts = []
+
+    # Start with a base query
+    query_parts.append("Looking for a nice car")
 
     # 1. Add preference filters if preferences exist
     if preferences:
         # Budget
         if preferences.budgetMin and preferences.budgetMax:
             query_parts.append(
-                f"${preferences.budgetMin/100:,.0f}-${preferences.budgetMax/100:,.0f}")
+                f"ideally between ${preferences.budgetMin:,} and ${preferences.budgetMax:,}")
 
-        # Other preferences
-        pref_to_label = {
-            "carTypes": "Type",
-            "fuelTypes": "Fuel",
-            "brand": "Brand",
-            "features": "Features",
-            "primarilyUse": "Use",
-            "topPriorities": "Priority"
-        }
+        # Car Types
+        if preferences.carTypes and len(preferences.carTypes) > 0:
+            query_parts.append(f"Prefer {' or '.join(preferences.carTypes)}")
 
-        for pref_key, label in pref_to_label.items():
-            pref_value = getattr(preferences, pref_key)
-            if pref_value and len(pref_value) > 0:
-                query_parts.append(f"{label}: {', '.join(pref_value)}")
+        # Fuel Types
+        if preferences.fuelTypes and len(preferences.fuelTypes) > 0:
+            query_parts.append(f"that run on {' or '.join(preferences.fuelTypes)} fuel")
+
+        # Brand
+        if preferences.brand and len(preferences.brand) > 0:
+            query_parts.append(f"Brands I like include {', '.join(preferences.brand)}")
+
+        # Features
+        if preferences.features and len(preferences.features) > 0:
+            query_parts.append(f"Key features I want are {', '.join(preferences.features)}")
+
+        # Primary Use
+        if preferences.primarilyUse and len(preferences.primarilyUse) > 0:
+            query_parts.append(f"The car should be great for {' and '.join(preferences.primarilyUse)}")
+
+        # Top Priorities
+        if preferences.topPriorities and len(preferences.topPriorities) > 0:
+            query_parts.append(f"My top priorities are {', '.join(preferences.topPriorities)}")
 
     # 2. Add activity signals if activities exist
     if activities:
@@ -45,13 +58,16 @@ def generate_query(preferences: Optional[Preferences], activities: Optional[List
         for activity in activities:
             if activity.action == "searched" and activity.query:
                 search_terms.append(activity.query)
-            elif activity.carIds:
-                seen_cars.update(activity.carIds)
+            elif activity.carTitles:
+                seen_cars.update(activity.carTitles)
 
         if seen_cars:
-            query_parts.append(f"Like: {', '.join(sorted(seen_cars))}")
+            query_parts.append(f"I liked cars such as the {', '.join(sorted(seen_cars))}")
 
         if search_terms:
-            query_parts.append(f"Searched: {', '.join(set(search_terms))}")
+            query_parts.append(f"I've searched for {' and '.join(set(search_terms))}")
 
-    return " | ".join(query_parts) if query_parts else "Show all vehicles"
+    if savedVehicles:
+        query_parts.append(f"I've saved the {', '.join(savedVehicles)}")
+
+    return " ".join(query_parts) if query_parts else "Show all vehicles"

@@ -14,9 +14,10 @@ class Preferences(BaseModel):
 
 class Activity(BaseModel):
     action: str
-    carIds: Optional[List[str]] = []
+    carTitles: Optional[List[str]] = []
     query: Optional[str] = None
 
 class RecommendationRequest(BaseModel):
     preferences: Optional[Preferences] = None
     activities: Optional[List[Activity]] = None
+    savedVehicles: Optional[List[str]] = []
