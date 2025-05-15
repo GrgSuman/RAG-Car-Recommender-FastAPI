@@ -1,19 +1,13 @@
 import os
-from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-
-from data import vehicles  
-
-# Load environment variables
-load_dotenv()
 
 def prepare_car_for_embedding(car):
     """Format car data into a rich text description for embedding"""
     fuel_economy = (f"{car['fuelConsumptionCombined']}L/100km" 
                    if car['fuelConsumptionCombined'] else "N/A")
     
-    price = f"${car['price']/100:,.2f}"  # Convert cents to dollars
+    price = f"${car['price']:,.2f}"  # Convert cents to dollars
     
     return f"""
     {car['year']} {car['make']} {car['model']} ({car['color']})
@@ -50,8 +44,3 @@ def build_vector_store(vehicles):
         metadatas=metadatas
     )
     return vector_store
-
-# if __name__ == "__main__":
-#     # Build and save the vector store when script is run
-#     vector_store = build_vector_store(vehicles)
-#     print("Vector store created and saved successfully!")
