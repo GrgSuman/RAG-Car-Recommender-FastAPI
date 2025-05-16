@@ -67,7 +67,8 @@ def generate_query(preferences: Optional[Preferences], activities: Optional[List
         if search_terms:
             query_parts.append(f"I've searched for {' and '.join(set(search_terms))}")
 
+    # 3. Add saved vehicles as part of the context, not as a direct match
     if savedVehicles:
-        query_parts.append(f"I've saved the {', '.join(savedVehicles)}")
+        query_parts.append(f"Similar to what I've saved before")  # More general reference
 
     return " ".join(query_parts) if query_parts else "Show all vehicles"
