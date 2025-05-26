@@ -60,6 +60,8 @@ async def get_recommendations(request: RecommendationRequest):
 
     query = generate_query(request.preferences, request.activities, request.savedVehicles)
 
+    print(query)
+
     # Initialize embeddings 
     embeddings = GoogleGenerativeAIEmbeddings(
         model="models/embedding-001",
@@ -70,13 +72,36 @@ async def get_recommendations(request: RecommendationRequest):
     vector_store = FAISS.load_local("car_search_index_50", embeddings,allow_dangerous_deserialization=True)
 
     # execute query
-    results = vector_store.similarity_search(query, k=6)
+    results = vector_store.similarity_search(query, k=10)  # Increased k to account for filtering
 
-    # Extract only metadata from results
+    # Extract metadata and filter by price range
     car_recommendations = []
-    for doc in results:
-        car = doc.metadata
-        car_recommendations.append(car)
+    if request.preferences and request.preferences.budgetMin is not None and request.preferences.budgetMax is not None:
+        # Calculate price range
+        if request.preferences.budgetMin == 0:
+            min_price = 0
+            max_price = request.preferences.budgetMax + 5000
+        else:
+            min_price = max(0, request.preferences.budgetMin - 2000)
+            max_price = request.preferences.budgetMax + 5000
+
+        # Filter results by price
+        for doc in results:
+            car = doc.metadata
+            try:
+                price = float(car.get('price', 0))
+                if min_price <= price <= max_price:
+                    car_recommendations.append(car)
+                    if len(car_recommendations) >= 6:  # Limit to 6 results after filtering
+                        break
+            except (ValueError, TypeError):
+                continue
+    else:
+        # If no price range specified, return all results
+        for doc in results:
+            car_recommendations.append(doc.metadata)
+            if len(car_recommendations) >= 6:
+                break
 
     return {
         "status": "success",

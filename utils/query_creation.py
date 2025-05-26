@@ -19,12 +19,21 @@ def generate_query(preferences: Optional[Preferences], activities: Optional[List
     # Start with a base query
     query_parts.append("Looking for a nice car")
 
-    # 1. Add preference filters if preferences exist
+    # 1. Add preference signals if preferences exist
     if preferences:
-        # Budget
+        # Budget - Extend range below min and above max
         if preferences.budgetMin and preferences.budgetMax:
+            # If min is 0, only extend the max
+            if preferences.budgetMin == 0:
+                strict_min = 0
+                strict_max = preferences.budgetMax + 5000
+            else:
+                # Extend 2k below min and 5k above max
+                strict_min = max(0, preferences.budgetMin - 2000)
+                strict_max = preferences.budgetMax + 5000
+            
             query_parts.append(
-                f"ideally between ${preferences.budgetMin:,} and ${preferences.budgetMax:,}")
+                f"between ${strict_min:,} and ${strict_max:,}")
 
         # Car Types
         if preferences.carTypes and len(preferences.carTypes) > 0:
