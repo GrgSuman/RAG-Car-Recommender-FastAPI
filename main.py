@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 from models import RecommendationRequest
 
 # Load environment variables
+
+
 load_dotenv()
 
 app = FastAPI(title="Car Recommendation API")

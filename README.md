@@ -1,6 +1,6 @@
 # Car Recommendation API
 
-A sophisticated car recommendation system built with FastAPI that uses Google's Generative AI and vector embeddings to provide personalized car recommendations based on user preferences, activities, and saved vehicles.
+A Car recommendation system built with FastAPI that uses Google's Generative AI and vector embeddings to provide personalized car recommendations based on user preferences, activities, and saved vehicles.
 
 ## How It Works
 
@@ -10,7 +10,7 @@ The system uses a multi-step process to generate personalized car recommendation
 
 1. **Query Generation**
    - Takes user preferences (budget, car types, brands, features, etc.)
-   - Considers user activities (searches, viewed cars)
+   - Considers user activities (searches, viewed cars, compared cars)
    - Incorporates saved vehicles
    - Generates a natural language query that captures all requirements
 
